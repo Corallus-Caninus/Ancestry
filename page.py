@@ -42,22 +42,22 @@ class page:
         except:
             raise Exception("Could not connect pipeline to river..")
 
-        self.register()
+        self.load_page()
 
-    def register(self):
+    def load_page(self):
         '''
-        register a PointOfMutation into this executor for search from a river shared pipeline object.
+        load a PointOfMutation into this executor for search from a river shared pipeline object.
         '''
         self.eval = evaluator(inputs=2, outputs=1, population=100,
                     connectionMutationRate=0.5,nodeMutationRate=0.01,weightMutationRate=0.6,
                     weightPerturbRate=0.9,selectionPressure=3)
 
-        # TODO: this doesnt call self in river. need to resolve class in manager. notebook this
         self.loadedPOM = self.river.load()
-        if self.loadedPOM is not None: # river is initialized and contains no points
+        # if river in uninitialized, start searching from init topology.
+        if self.loadedPOM is not None: 
             self.eval.genepool = self.loadedPOM.swap(len(self.eval.genepool))
             #load in innovations from river to hopefully speed up verification and prevent memory bloat
-            self.eval.globalInnnovations = self.river.registerInnovations()
+            self.eval.globalInnnovations = self.river.load_map()
         
         #@DEPRECATED
         # self.eval.genepool, self.eval.globalInnovations = self.pipeline.swap_in(len(self.eval.genepool))
@@ -81,5 +81,5 @@ class page:
                 #continue search with new POM loaded
                 return self.exec()        
 
-        self.register()
+        self.load_page()
         return self.exec()

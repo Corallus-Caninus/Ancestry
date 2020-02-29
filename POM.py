@@ -16,8 +16,12 @@ class PointOfMutation:
 
         self.snapshot = snapshot
         self.mascot = mascot
-        self.parent = parent #TODO: this creates root node boostrapping shenanigans again
-    
+        #set edges for tree structure
+        self.parent = parent 
+        self.parent.children.append(self)
+        
+        self.children = []
+
     def merge(self, otherPOM):
         '''
         merge this Point of Mutation with another due to optimization or increasing radius
@@ -25,15 +29,24 @@ class PointOfMutation:
         PARAMETERS:
             otherPoM: the other PoM to be merged
         '''
-        # TODO: do merges extend, (increasingly large snapshot) or consider only genomes within fitness radius?
-        #       extension is intuitive for representing latent vector in fitness landscape but may get too large.
-        # this prevents walking PoMs in exchange for fuzzy points (better, may leave room for innovating)
-        otherPOM.snapshot.extend(self.snapshot)
-        # TODO: increase mascot count or take fittest?
-        # if self.mascot.fitness < otherPoM.mascot.fitness:
-        #     self.mascot = otherPoM.mascot
-        if otherPOM.mascot.fitness < self.mascot.fitness:
-            otherPOM.mascot = self.mascot
+        #TODO: going back to best river definition. this can also allow 
+        #      for re-evaluation of tree to remove false fitness PoMs
+        # TODO: need to deal with edges (tree structure of RoM)
+
+        otherPOM.snapshot = deepcopy(self.snapshot)
+        otherPOM.mascot = deepcopy(self.mascot)
+        #hackey solution
+        if otherPOM.parent is not self.parent:
+            otherPOM.parent = self.parent
+            otherPOM.children.extend(self.children)
+            #TODO: handle children
+        else:
+            otherPOM.parent = otherPOM.parent.parent
+            otherPOM.children.extend(self.children)
+        
+        #since merging this into other, set other parent and child edges to this
+        #copy Nodal_NEAT FSM structure
+
         #NOTE: this should deiterate all references to this POM as it is not in the otherPoM
     
     def swap(self, population):

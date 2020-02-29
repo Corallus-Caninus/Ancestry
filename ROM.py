@@ -1,15 +1,17 @@
 from organisms.evaluator import evaluator
 from organisms.innovation import globalInnovations
+from organisms.nuclei import nuclei
 from POM import PointOfMutation
 from page import page
 import random as rand
 
-#TODO: the ROM is the shared object seen by manager. extract manager/server to server.py and
-#      page implementing program to client.py This can allow for yaml kubernetes and general
+# TODO: the ROM is the shared object seen by manager. extract manager/server to server.py and
+#       page implementing program to client.py This can allow for yaml kubernetes and general
 #       resource negotiator targeting in the future.
 #
-#TODO: its the burden of ROM to store the tree structure of PoMs. Therefor parent-spawn edges
-#      must be maintained and compared here
+# NOTE: going with River model where number on parent edges and child edges at a PoM is 'river width' and 
+#       considering merges across domains/ranges is proportional to generalization score and 
+#       'innovation richness'. Which should be biased for selection on load() calls
 
 class RiverOfMutations:
     '''
@@ -22,8 +24,10 @@ class RiverOfMutations:
     CONSTRUCTS:
         a BaseManager that serves with methods for updating the river data structure from pages (POM searchers)
     '''
-    #NOTE: node depth in river is proportional to fitness and complexity due to 
-    #      justified complexification operation
+    #NOTE: this is also known as Ancestral Speciation but Rivers of Mutations 
+    #      is a little more descriptive.
+    #NOTE: node depth in river is proportional to fitness AND complexity due to 
+    #      justified complexification when considering new Points of Mutations.
 
     def __init__(self, radius, excessMetric, disjointMetric, connectionMetric):
         #TODO: need to track global innovations here.
@@ -35,17 +39,11 @@ class RiverOfMutations:
         self.disjointMetric = disjointMetric
         self.connectionMetric = connectionMetric
 
-
         self.POMs = [] #POM data structures
-
-        #TODO: dont initialize, let evaluator from page return the first. if no POM in manager
-        #      create initial evaluator in page
-        # initPOM = PointOfMutation()
         self.POMs = list()
-        # self.POMs.append(initPOM)
-        #TODO: implement globalInnovations and call 
-        #      self.innovations.join(page.innovations) on manager merge
-        self.innovations = globalInnovations()
+
+        #stores all discovered innovations from all page searchers
+        self.innovation_map = globalInnovations()
 
         
     #TODO: need to send a partial with globalInnovations kept here
@@ -56,12 +54,14 @@ class RiverOfMutations:
         if len(self.POMs) < 1:
             return False #signal that the page needs to search initial POM
         selected = self.POMs[rand.randint(0, len(self.POMs)-1)]
-        # selected = selected.swap(population)
-        # return selected, self.innovations
+
         return selected
     
-    def registerInnovations(self):
-        return self.innovations
+    def load_map(self):
+        '''
+        getter for innovation_map used in page
+        '''
+        return self.innovation_map
 
     #TODO: need to check incoming globalInnovations in below methods
     #      iterate through genepool and verifyConnection. verifyNode on split depths
@@ -69,41 +69,59 @@ class RiverOfMutations:
     def update(self, PointOfMutation):
         #NOTE: Pedantic explanation: agglomerative clustering of POMs given similarity (genetic) radius
         '''
-        attempt to add or merge this POM to the ROM and update globalInnovations if still relevant.
+        attempt to add or merge this POM to the ROM and update globalInnovations if still relevant
+        
+        PARAMETER:
+            PointOfMutation: a PointOfMutation object to be considered for integrating into the RoM
         '''
         noveltyComparator = lambda x,y: x.geneticDistance(y, 
             self.excessMetric, self.disjointMetric, self.connectionMetric) > self.radius       
         
         if PointOfMutation.mascot.fitness > PointOfMutation.parent.mascot.fitness and \
             all([noveltyComparator(x, PointOfMutation.mascot) for x in self.POMs]):
-            
-            #@DEPRECATED
-            # PointOfMutation.mascot.geneticDistance(POM.mascot, 
-            #     self.disjointMetric,self.excessMetric, self.connectionMetric) > self.radius:
-            
             #accept the new POM
             self.POMs.append(PointOfMutation)
         else:
-            for POM in self.POMs:
-                #also considers optimizations (self merges)
-                #
-                # TODO: how does merge to parent effect this. when a POM is optimized how
-                #       does the fitness gradient be forced, safe currently since merge 
-                #       still has to pass condition here. cleanup POM ordering here.
+            mergeComparator = lambda POM: PointOfMutation.mascot.fitness > POM and \
+                                PointOfMutation.mascot.geneticDistance(POM.mascot, \
+                                self.disjointMetric, self.excessMetric, self.connectionMetric) <= self.radius
+            blob = filter(mergeComparator, self.POMs)
+            map(PointOfMutation.merge, blob)
 
-                if PointOfMutation.mascot.fitness > POM and \
-                    PointOfMutation.mascot.geneticDistance(POM.mascot, \
-                        self.disjointMetric, self.excessMetric, self.connectionMetric) <= self.radius:
-                    #accept the merged POM solution
-                    PointOfMutation.merge(POM)
-            
             #reset the fitness gradient
-            self.POMs = filter(lambda x: x.parent.mascot.fitness < x.mascot.fitness, self.POMs)
-            # TODO: reset parents (edges)
+            #@DEPRECATED
+            # self.POMs = filter(lambda x: x.parent.mascot.fitness < x.mascot.fitness, self.POMs)
+            
+            #form a 'blob' that defines all POMs getting removed from merge operation            
+            parentBlobClosures = filter(lambda x: x.parent in blob, blob)
+            childBlobClosures = filter(lambda x: any([y in x.children for y in blob]), blob)
+            # now seam all gaps caused by removing closures
+            for parentSeam in parentBlobClosures:
+                #climb upstream until out of blob or root node
+                while parentSeam.parent is not None and parentSeam.parent in blob:
+                    parentSeam.parent = parentSeam.parent.parent
+            for childSeam in childBlobClosures:
+                childSeam.children = [x for x in childSeam.children if x not in blob]
 
-    def inheritInnovations(self, localInnovations):
-        #TODO: verifyConnection and verifyNode using connections and primalGenes from
-        #       incoming PointOfMutation snapshot
-        # always call on merge or update
-        
-        pass
+            
+
+    def update_map(self, incomingGenepool):
+        #TODO: call on POM tree-list update
+        #NOTE: splitDepth data structure template:
+        # genome[split] =
+        #   [node1, node2, ..]
+        #   list index = splitDepth
+        tmpNuclei = nuclei()
+        for g in incomingGenepool:
+            tmpNuclei.readyPrimalGenes(g)
+            for split in tmpNuclei.primalGenes[g]:
+                #verify nodes then connections
+                # TODO: look back a split depth for resultant connection
+                for con in split:
+                    for outNode in con.outputNode:
+                        self.innovation_map.verifynode()
+                        pass
+                    for inNode in con.inputNode:
+                        pass
+
+        #iterate through all splits and verify connections and nodes

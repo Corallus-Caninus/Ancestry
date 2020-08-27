@@ -7,8 +7,8 @@ containers: [
     image: 'python:3.8.5-slim-buster',
     ttyEnabled: true,
     command: 'cat'),
-],
-label: 'ancestry-pipeline'
+]
+//label: 'ancestry-pipeline'
 ) {
     //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
     node(POD_LABEL) {
@@ -50,8 +50,8 @@ containers: [
     image: 'python:3.8.5-slim-buster',
     ttyEnabled: true,
     command: 'cat'),
-],
-label: 'ancestry-pipeline'
+]
+//label: 'ancestry-pipeline'
 ) {
     //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
     node(POD_LABEL) {

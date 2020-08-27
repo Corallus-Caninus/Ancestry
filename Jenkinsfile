@@ -19,11 +19,10 @@ containers: [
                 //git 'https://github.com/Corallus-Caninus/Nodal_NEAT.git' .
                 sh 'apt update'
                 sh 'apt install git -y'
+                sh 'git clone https://github.com/Corallus-Caninus/Nodal_NEAT.git Nodal_Neat'
                 sh 'git clone https://github.com/Corallus-Caninus/Ancestry.git Ancestry'
-                sh 'apt install build-essential -y'
-                //TODO: this should be handled in setup.py
-                sh 'pip install graphviz'
-                sh 'pip install matplotlib'
+                // sh 'apt install build-essential -y'
+                sh 'pip install ./Nodal_NEAT'
                 sh 'pip install ./Ancestry'
             }
         }
@@ -62,11 +61,10 @@ containers: [
                 //git 'https://github.com/Corallus-Caninus/Nodal_NEAT.git' .
                 sh 'apt update'
                 sh 'apt install git -y'
+                sh 'git clone https://github.com/Corallus-Caninus/Nodal_NEAT.git Nodal_Neat'
                 sh 'git clone https://github.com/Corallus-Caninus/Ancestry.git Ancestry'
-                sh 'apt install build-essential -y'
-                //TODO: this should be handled in setup.py
-                sh 'pip install graphviz'
-                sh 'pip install matplotlib'
+                // sh 'apt install build-essential -y'
+                sh 'pip install ./Nodal_NEAT'
                 sh 'pip install ./Ancestry'
             }
         }

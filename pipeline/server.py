@@ -2,7 +2,7 @@ from multiprocessing.managers import BaseManager
 
 from RiverOfMutation.ROM import RiverOfMutations
 
-# TODO:  if manager continues to throw errors, rewrite server, Page, client
+# TODO:  if manager continues to throw errors, rewrite server, Searcher, client
 #       and ROM to take serialized/pickled POMs and process them internally 
 #       since ROM is by design distributable at POM level if nothing else.
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     BaseManager.register('River', callable=lambda: head_stream)
 
     # TODO: verify service works in kubernetes then extract to configuration/kwargs
-    manager = BaseManager(address=('ancestry-pipeline', 5000), authkey='bada'.encode())
+    manager = BaseManager(address=('', 5000), authkey='bada'.encode())
     print('serving ROM: {}..'.format(dir(head_stream)))
     manager.get_server().serve_forever()
     print('server shutdown.')

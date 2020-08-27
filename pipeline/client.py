@@ -1,8 +1,7 @@
 from pipeline.page import page
 
 
-# TODO: try this with XOR and an actual gradient
-# TODO: make this a template and extract this to tests module
+# NOTE: this is a template
 def fit(x):
     x.fitness = 2
     return x

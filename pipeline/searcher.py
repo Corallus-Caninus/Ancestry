@@ -7,6 +7,9 @@ from organisms.innovation import GlobalInnovations as localInnovations
 
 
 # NOTE:  this allows implementation of hyperparameter sweep via searchers.
+#        Eventually automate this so the environment alters mutation rates.
+#        would also like remove distance parameter for PoM radius.
+#
 #       need to resolve:
 #       RoM structure since edges are no longer finite sample space.
 #           |_large mutation rates encroach on higher complexities even with
@@ -14,13 +17,8 @@ from organisms.innovation import GlobalInnovations as localInnovations
 #           |_generalization more complex.
 # NOTE: can always use lower level shared Queue if this starts failing or needs
 #       simple optimization.
-# TODO: rename to searcher or something Page is a little too forced of a metaphore
-class Page:
-
-    # NOTE: referred to as a 'Page' due to the analogy of swap space and main memory in
-    #      computer architecture, allowing ancestral speciation (ROM) to cover a search 
-    #      space larger than normally possible by swapping in and out Points of Mutation.
-
+# TODO: rename to searcher or something Searcher is a little too forced of a metaphore
+class Searcher:
     def __init__(self, timeout, address, fitnessFunction, fitnessObjective):
         """
          a PointOfMutation processor with a timeout/stagnation condition (lifetime) for searching a
@@ -30,7 +28,7 @@ class Page:
          PARAMETERS:
              timeout: time allotted to search this Point of Mutation
              address: list of strings [address,port] of RoM manager server instance to
-                      communicate Page swaps and updates
+                      communicate Searcher swaps and updates
 
              fitnessFunction: function to be optimized (should be same across all pages for now)
              fitnessObjective: fitness score threshold where function has been solved
@@ -58,7 +56,7 @@ class Page:
             print('connecting..')
             self.pipeline.connect()
             print('connected.\n acquiring RoM shared object..')
-            # link a shared river object to this Page
+            # link a shared river object to this Searcher
             self.river = self.pipeline.River()
             print('RoM acquired.')
             print('RoM object: ', dir(self.river))

@@ -1,6 +1,6 @@
 import random as rand
 import unittest
-from pipeline.page import page
+from pipeline.searcher import Searcher
 
 
 def xor(solutionList):
@@ -54,7 +54,7 @@ def myFunc(genome):
 class TestXOR(unittest.TestCase):
     def test_xor(self):
         # TODO: test name of service
-        p = page(10, 'ancestry-pipeline', myFunc, 10)
+        p = Searcher(10, 'ancestry-server', myFunc, 10)
         #p = page(10, '127.0.0.1', myFunc, 10)
         p.exec()
 

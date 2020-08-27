@@ -39,7 +39,7 @@ class RiverOfMutations:
 
         self.POMs = []  # POM data structures
 
-        # stores all discovered innovations from all Page searchers
+        # stores all discovered innovations from all Searcher searchers
         # TODO: how does this behave with shared object.
         self.innovation_map = GlobalInnovations()
 
@@ -70,7 +70,7 @@ class RiverOfMutations:
 
     def load_map(self):
         """
-        getter for innovation_map used in Page
+        getter for innovation_map used in Searcher
         """
         print('Request: innovation map')
         return self.innovation_map

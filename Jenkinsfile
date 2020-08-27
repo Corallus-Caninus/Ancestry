@@ -5,10 +5,11 @@ containers: [
     containerTemplate(
     name: 'Ancestral_Server',
     image: 'python:3.8.5-slim-buster',
-    label: 'AncestryPipeline',
     ttyEnabled: true,
     command: 'cat'),
-]) {
+],
+label: 'ancestry-pipeline'
+) {
     //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
     node(POD_LABEL) {
         container('Ancestral_Server') {
@@ -46,11 +47,12 @@ podTemplate(
 containers: [
     containerTemplate(
     name: 'Ancestral_Server',
-    label: 'AncestryPipeline',
     image: 'python:3.8.5-slim-buster',
     ttyEnabled: true,
     command: 'cat'),
-]) {
+],
+label: 'ancestry-pipeline'
+) {
     //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
     node(POD_LABEL) {
         container('Ancestral_Client') {

@@ -3,7 +3,7 @@
 podTemplate(
 containers: [
     containerTemplate(
-    name: 'Ancestral_Server',
+    name: 'ancestral-server',
     image: 'python:3.8.5-slim-buster',
     ttyEnabled: true,
     command: 'cat'),
@@ -12,7 +12,7 @@ label: 'ancestry-pipeline'
 ) {
     //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
     node(POD_LABEL) {
-        container('Ancestral_Server') {
+        container('ancestral-server') {
             stage('Build') {
                 //TODO: move this into docker image. Jenkins doesnt have
                 //      layered multistage build.
@@ -28,7 +28,7 @@ label: 'ancestry-pipeline'
             }
         }
         stage('Serve') {
-            container('Ancestral_Server') {
+            container('ancestral-server') {
                 dir('./Ancestry') {
                     // TODO: call nose with JUnit reporting
                     // TODO: call server here, unittests will be performed from the client
@@ -46,7 +46,7 @@ label: 'ancestry-pipeline'
 podTemplate(
 containers: [
     containerTemplate(
-    name: 'Ancestral_Server',
+    name: 'ancestral-client',
     image: 'python:3.8.5-slim-buster',
     ttyEnabled: true,
     command: 'cat'),
@@ -55,7 +55,7 @@ label: 'ancestry-pipeline'
 ) {
     //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
     node(POD_LABEL) {
-        container('Ancestral_Client') {
+        container('ancestral-client') {
             stage('Build') {
                 //TODO: move this into docker image. Jenkins doesnt have
                 //      layered multistage build.
@@ -71,7 +71,7 @@ label: 'ancestry-pipeline'
             }
         }
         stage('Test') {
-            container('Ancestral_Server') {
+            container('ancestral-client') {
                 dir('./Ancestry') {
                     // TODO: call nose with JUnit reporting
                     sh 'python -m unittest'

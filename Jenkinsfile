@@ -2,8 +2,7 @@
 //       REQUIRES SERVICE
 // TODO: parallelize tests branch only, cant fork from build branch
 //       need dockerfile
-
-parallel serverBranch: {
+parallel serveBranch: {
     podTemplate(
     containers: [
         containerTemplate(
@@ -54,10 +53,10 @@ parallel serverBranch: {
         ttyEnabled: true,
         command: 'cat'),
     ]
-    label: 'ancestry-client'
+    //label: 'ancestry-pipeline'
     ) {
         //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
-        node('ancestry-client') {
+        node(POD_LABEL) {
             container('ancestral-client') {
                 stage('Build') {
                     //TODO: move this into docker image. Jenkins doesnt have
@@ -72,20 +71,15 @@ parallel serverBranch: {
                     sh 'pip install ./Ancestry'
                 }
             }
-        }
-    }
-},
-failFast: false
-
-node('ancestry-client') {
-    container('ancestral-client') {
-        stage('Test') {
-            container('ancestral-client') {
-                dir('./Ancestry') {
-                    // TODO: call nose with JUnit reporting
-                    sh 'python -m unittest'
+            stage('Test') {
+                container('ancestral-client') {
+                    dir('./Ancestry') {
+                        // TODO: call nose with JUnit reporting
+                        sh 'python -m unittest'
+                    }
                 }
             }
         }
     }
-}
+},
+failFast: false

@@ -78,14 +78,15 @@ pipeline {
                     }
                 }
             },
-        stage('test'){
-            tests: {
-                node('ancestry-pipeline') {
-                    stage('Test') {
-                        container('ancestral-client') {
-                            dir('./Ancestry') {
-                                // TODO: call nose with JUnit reporting
-                                sh 'python -m unittest'
+            stage('test'){
+                tests: {
+                    node('ancestry-pipeline') {
+                        stage('Test') {
+                            container('ancestral-client') {
+                                dir('./Ancestry') {
+                                    // TODO: call nose with JUnit reporting
+                                    sh 'python -m unittest'
+                                }
                             }
                         }
                     }

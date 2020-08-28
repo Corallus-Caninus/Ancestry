@@ -46,7 +46,6 @@ pipeline {
                         }
                     }
                 }
-            }, {
                 // NOTE: this only scales out one client. a further pipeline CD implementation would have n clients.
                 //       all unittests assume a RoM manager is serving shared objects.
                 podTemplate(

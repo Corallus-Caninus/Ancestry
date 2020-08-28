@@ -52,11 +52,11 @@ parallel serveBranch: {
         image: 'python:3.8.5-slim-buster',
         ttyEnabled: true,
         command: 'cat'),
-    ]
-    //label: 'ancestry-pipeline'
+    ],
+    label: 'ancestry-pipeline'
     ) {
         //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
-        node(POD_LABEL) {
+        node('ancestry-pipeline') {
             container('ancestral-client') {
                 stage('Build') {
                     //TODO: move this into docker image. Jenkins doesnt have
@@ -71,15 +71,18 @@ parallel serveBranch: {
                     sh 'pip install ./Ancestry'
                 }
             }
-            stage('Test') {
-                container('ancestral-client') {
-                    dir('./Ancestry') {
-                        // TODO: call nose with JUnit reporting
-                        sh 'python -m unittest'
-                    }
-                }
-            }
         }
     }
 },
 failFast: false
+
+node('ancestry-pipeline') {
+    stage('Test') {
+        container('ancestral-client') {
+            dir('./Ancestry') {
+                // TODO: call nose with JUnit reporting
+                sh 'python -m unittest'
+            }
+        }
+    }
+}

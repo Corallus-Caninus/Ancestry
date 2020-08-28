@@ -1,6 +1,7 @@
 // NOTE: BUILT WITH KUBERNETES JENKINS PLUGIN
 //       REQUIRES SERVICE
-// TODO: parallelize tests branch only
+// TODO: parallelize tests branch only, cant fork from build branch
+//       need dockerfile
 parallel serveBranch: {
     podTemplate(
     containers: [
@@ -35,7 +36,7 @@ parallel serveBranch: {
                         // TODO: call server here, unittests will be performed from the client
                         //       since RoM object is shared this is fine.
                         // sh 'python -m unittest'
-                        sh 'python ./pipeline/server.py'
+                        sh 'python ./pipeline/server.py &'
                     }
                 }
             }

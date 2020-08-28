@@ -3,7 +3,6 @@
 // TODO: parallelize tests branch only, cant fork from build branch
 //       need dockerfile
 pipeline {
-    agent kubernetes
     stages {
         stage('prepare'){
             parallel serveBranch: {

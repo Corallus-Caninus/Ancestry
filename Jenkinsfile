@@ -53,7 +53,7 @@ parallel serverBranch: {
         image: 'python:3.8.5-slim-buster',
         ttyEnabled: true,
         command: 'cat'),
-    ]
+    ],
     label: 'ancestry-client'
     ) {
         //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.

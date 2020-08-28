@@ -3,6 +3,7 @@
 // TODO: parallelize tests branch only, cant fork from build branch
 //       need dockerfile
 pipeline {
+    agent none
     stages {
         stage('prepare'){
             parallel serveBranch: {

@@ -76,7 +76,7 @@ pipeline {
                         }
                     }
                 }
-            },
+            }
             stage('test'){
                 tests: {
                     node('ancestry-pipeline') {

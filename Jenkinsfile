@@ -1,5 +1,6 @@
 // NOTE: BUILT WITH KUBERNETES JENKINS PLUGIN
 //       REQUIRES SERVICE
+// TODO: parallelize tests branch only
 parallel serveBranch: {
     podTemplate(
     containers: [
@@ -40,7 +41,7 @@ parallel serveBranch: {
             }
         }
     }
-}, clientBranch:{
+}, clientBranch: {
     // NOTE: this only scales out one client. a further pipeline CD implementation would have n clients.
     //       all unittests assume a RoM manager is serving shared objects.
     podTemplate(

@@ -6,7 +6,7 @@ pipeline {
     agent none
     stages {
         stage('prepare'){
-            parallel serveBranch: {
+            parallel {
                 podTemplate(
                 containers: [
                     containerTemplate(
@@ -46,7 +46,7 @@ pipeline {
                         }
                     }
                 }
-            }, clientBranch: {
+            }, {
                 // NOTE: this only scales out one client. a further pipeline CD implementation would have n clients.
                 //       all unittests assume a RoM manager is serving shared objects.
                 podTemplate(

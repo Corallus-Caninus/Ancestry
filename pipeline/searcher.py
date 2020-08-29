@@ -79,15 +79,16 @@ class Searcher:
         """
         create a POM with the current genepool.
         """
-        # TODO: first condition may be failing
+        snapshot = deepcopy(self.evaluator.genepool)
+        mascot = max([x for x in snapshot], key=lambda x: x.fitness)
+
         if self.loadedPOM is not None:
-            potential = PointOfMutation(deepcopy(self.evaluator.genepool),
-                                        deepcopy(max([x for x in self.evaluator.genepool],
-                                                     key=lambda x: x.fitness)), deepcopy(self.loadedPOM))
+            # TODO: ensure this deepcopy doesnt lose parent relationship
+            #       since parents are defined here and unique this
+            #       should be fine
+            potential = PointOfMutation(snapshot, mascot, deepcopy(self.loadedPOM))
         else:
-            potential = PointOfMutation(deepcopy(self.evaluator.genepool),
-                                        deepcopy(max([x for x in self.evaluator.genepool],
-                                                     key=lambda x: x.fitness)), None)
+            potential = PointOfMutation(snapshot, mascot, None)
 
         return potential
 

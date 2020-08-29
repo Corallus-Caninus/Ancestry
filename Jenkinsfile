@@ -24,7 +24,7 @@ pipeline {
                             //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
                             node('ancestry-server') {
                                 container('ancestral-server') {
-                                    stage('Build') {
+                                    //stage('Build') {
                                         //TODO: move this into docker image. Jenkins doesnt have
                                         //      layered multistage build.
                                         //git 'https://github.com/Corallus-Caninus/Nodal_NEAT.git' .
@@ -35,9 +35,9 @@ pipeline {
                                         // sh 'apt install build-essential -y'
                                         sh 'pip install ./Nodal_NEAT'
                                         sh 'pip install ./Ancestry'
-                                    }
+                                    //}
                                 }
-                                stage('Serve') {
+                                //stage('Serve') {
                                     container('ancestral-server') {
                                         dir('./Ancestry') {
                                             // TODO: call nose with JUnit reporting
@@ -47,7 +47,7 @@ pipeline {
                                             sh 'python ./pipeline/server.py &'
                                         }
                                     }
-                                }
+                                //}
                             }
                         }
                     }
@@ -71,7 +71,7 @@ pipeline {
                             //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
                             node('ancestry-client') {
                                 container('ancestral-client') {
-                                    stage('Build') {
+                                    //stage('Build') {
                                         //TODO: move this into docker image. Jenkins doesnt have
                                         //      layered multistage build.
                                         //git 'https://github.com/Corallus-Caninus/Nodal_NEAT.git' .
@@ -82,7 +82,7 @@ pipeline {
                                         // sh 'apt install build-essential -y'
                                         sh 'pip install ./Nodal_NEAT'
                                         sh 'pip install ./Ancestry'
-                                    }
+                                    //}
                                 }
                             }
                         }

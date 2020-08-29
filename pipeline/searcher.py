@@ -84,6 +84,8 @@ class Searcher:
             potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
                                                                      key=lambda x: x.fitness), None)
         else:
+            # TODO: this needs to be refactored
+            self.evaluator.nextGeneration(self.fitnessFunction)
             potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
                                                                      key=lambda x: x.fitness), self.loadedPOM.parent)
         return potential
@@ -109,9 +111,16 @@ class Searcher:
             self.loadedPOM = self.create_POM()
 
         self.evaluator.globalInnnovations = self.river.load_map()
-        # @DEPRECATED
-        # self.evaluator.genepool, self.evaluator.GlobalInnovations = \
-        # self.pipeline.swap_in(len(self.evaluator.genepool))
+
+    def refresh(self, potential):
+        """
+        continue searching the current PoM but retrieve updated
+        innovations and update the river
+        """
+        self.river.update(potential)
+        self.loadedPOM = potential
+        self.evaluator.globalInnovations = self.river.load_map()
+        return self.exec()
 
     def exec(self):
         """
@@ -119,29 +128,27 @@ class Searcher:
         retrieving a new PointOfMutation when timeout is reached unless a new POM
         is discovered.
         """
-
         for _ in range(0, self.timeout):
-            self.evaluator.nextGeneration(self.fitnessFunction, self.fitnessObjective)
+            self.evaluator.nextGeneration(self.fitnessFunction)
 
+            # TODO: dont call create_POM every time.
             potential = self.create_POM()
+
             # merge PoM condition
-            # TODO: this doesnt have access to POMs this is a River routine!
-            if any([x.fitness > self.loadedPOM.mascot.fitness for x in self.POMs]):
-                # TODO: FINISH IT Aunt May!!!
-                # TODO: create a new PoM
-                # self.loadedPOM
-                # this PoM is now the new one to be searched, continue
-                return self.exec()
-                pass
+            # check if locally justified complexification
+            # TODO: refactor these conditions
+            if any([x.fitness > self.loadedPOM.mascot.fitness for x in self.evaluator.genepool]):
+                # TODO: should wait for update to see if this searcher is far behind others and should
+                #       load instead of recurse. not critical if this is a very inferior solution
+                #       the likelihood of timeout in the next evaluation is higher
+                return self.refresh(potential)
 
             # terminal condition
             if any([x.fitness > self.fitnessObjective
                     for x in self.evaluator.genepool]):
-                self.river.update(potential)
-                # TODO: this shouldnt be called since terminating
-                # @DEPRECATED
-                # continue search with new POM loaded
-                # return self.exec()
+                # keep searching since alternate conventions still exist
+                return self.refresh(potential)
 
         # timeout has occured, request a new PoM to search
+        self.load()
         return self.exec()

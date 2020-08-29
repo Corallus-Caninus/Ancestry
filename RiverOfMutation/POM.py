@@ -19,8 +19,10 @@ class PointOfMutation:
         self.mascot = mascot
 
         # set edges for tree structure
-        self.parent = parent
-        self.parent.children.append(self)
+        if self.parent is not None:
+            self.parent = parent
+            self.parent.children.append(self)
+
         self.children = []
 
     def __add__(self, other):

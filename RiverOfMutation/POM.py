@@ -17,6 +17,7 @@ class PointOfMutation:
 
         self.snapshot = snapshot
         self.mascot = mascot
+        self.parent = None
 
         # set edges for tree structure
         if parent is not None:

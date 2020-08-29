@@ -80,7 +80,7 @@ class Searcher:
         create a POM with the current genepool.
         """
         # TODO: this should be simpler
-        if self.loadedPOM.parent is None:
+        if self.loadedPOM is None:
             potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
                                                                      key=lambda x: x.fitness), None)
         else:

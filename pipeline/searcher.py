@@ -115,6 +115,7 @@ class Searcher:
         continue searching the current PoM but retrieve updated
         innovations and update the river
         """
+        print('refreshing searcher..')
         self.river.update(potential)
         self.loadedPOM = potential
         self.evaluator.globalInnovations = self.river.load_map()
@@ -126,7 +127,8 @@ class Searcher:
         retrieving a new PointOfMutation when timeout is reached unless a new POM
         is discovered.
         """
-        for _ in range(0, self.timeout):
+        for time in range(0, self.timeout):
+            print('searching.. {}'.format(time))
             self.evaluator.nextGeneration(self.fitnessFunction)
 
             # TODO: dont call create_POM every time.
@@ -145,8 +147,10 @@ class Searcher:
             if any([x.fitness > self.fitnessObjective
                     for x in self.evaluator.genepool]):
                 # keep searching since alternate conventions still exist
+                print('search complete.')
                 return self.refresh(potential)
 
         # timeout has occured, request a new PoM to search
+        print('search timeout, restarting..')
         self.load()
         return self.exec()

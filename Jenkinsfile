@@ -20,7 +20,7 @@ pipeline {
                             command: 'cat'),
                         ],
                         label: 'ancestry-server',
-                        podRetention: onFailure()
+                        podRetention: always()
                         //idleMinutes: 15
                         ) {
                             //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
@@ -68,7 +68,7 @@ pipeline {
                             command: 'cat'),
                         ],
                         label: 'ancestry-client',
-                        podRetention: onFailure()
+                        podRetention: always()
                         //idleMinutes: 11
                         //label: 'ancestry-pipeline'
                         ) {

@@ -91,13 +91,14 @@ class RiverOfMutations:
         print('Received: POM update attempt..')
 
         def mergeComparator(POM):
+            # return PointOfMutation.mascot.fitness > POM and PointOfMutation.mascot.geneticDistance(
             return PointOfMutation.mascot.fitness > POM and PointOfMutation.mascot.geneticDistance(
                 POM.mascot, self.disjointMetric,
                 self.excessMetric, self.connectionMetric)
 
         def noveltyComparator(x, y):
-            return x.geneticDistance(y, self.excessMetric, self.disjointMetric, self.connectionMetric) > \
-                   self.radius
+            return x.mascot.geneticDistance(y.mascot, self.excessMetric, self.disjointMetric,
+                                            self.connectionMetric) > self.radius
 
         # @DEPRECATED
         # noveltyComparator = lambda x, y: x.geneticDistance(
@@ -115,7 +116,7 @@ class RiverOfMutations:
         # TODO: ensure or doesnt check second condition after first fails
         if PointOfMutation.parent is None or PointOfMutation.mascot.fitness > PointOfMutation.parent.mascot.fitness:
             # new POM
-            if all([noveltyComparator(x, PointOfMutation.mascot) for x in self.POMs]):
+            if all([noveltyComparator(x, PointOfMutation) for x in self.POMs]):
                 # accept the new PoM
                 self.POMs.append(PointOfMutation)
             # merge/optimization PoM

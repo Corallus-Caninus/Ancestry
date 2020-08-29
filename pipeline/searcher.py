@@ -111,7 +111,7 @@ class Searcher:
 
         self.evaluator.globalInnnovations = self.river.load_map()
 
-    def refresh(self, potential):
+    def refresh(self):
         """
         continue searching the current PoM but retrieve updated
         innovations and update the river

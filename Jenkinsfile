@@ -19,7 +19,8 @@ pipeline {
                             ttyEnabled: true,
                             command: 'cat'),
                         ],
-                        label: 'ancestry-server'
+                        label: 'ancestry-server',
+                        idleMinutes: 15
                         ) {
                             //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.
                             node('ancestry-server') {
@@ -65,7 +66,8 @@ pipeline {
                             ttyEnabled: true,
                             command: 'cat'),
                         ],
-                        label: 'ancestry-client'
+                        label: 'ancestry-client',
+                        idleMinutes: 11
                         //label: 'ancestry-pipeline'
                         ) {
                             //TODO: scale out unittests on several pods to prototype yaml deployment structure over kubernetes.

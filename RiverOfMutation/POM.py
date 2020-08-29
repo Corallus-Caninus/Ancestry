@@ -19,7 +19,7 @@ class PointOfMutation:
         self.mascot = mascot
 
         # set edges for tree structure
-        if self.parent is not None:
+        if parent is not None:
             self.parent = parent
             self.parent.children.append(self)
 

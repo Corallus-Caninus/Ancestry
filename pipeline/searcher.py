@@ -79,9 +79,10 @@ class Searcher:
         """
         create a POM with the current genepool.
         """
+        # TODO: first condition may be failing
         if self.loadedPOM is not None:
             potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
-                                                                     key=lambda x: x.fitness), self.loadedPOM.parent)
+                                                                     key=lambda x: x.fitness), self.loadedPOM)
         else:
             potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
                                                                      key=lambda x: x.fitness), None)
@@ -116,11 +117,14 @@ class Searcher:
         innovations and update the river
         """
         print('refreshing searcher..')
-        self.river.update(potential)
-        self.loadedPOM = potential
+        fresh = self.create_POM()
+        self.river.update(fresh)
+        self.loadedPOM = fresh
         self.evaluator.globalInnovations = self.river.load_map()
         return self.exec()
 
+    # TODO: load in merged solution on RoM merge (this all needs to be traced
+    #       against RoM tree operations and structure
     def exec(self):
         """
         search for timeout generations, updating the river when the condition is met and
@@ -132,7 +136,7 @@ class Searcher:
             self.evaluator.nextGeneration(self.fitnessFunction)
 
             # TODO: dont call create_POM every time.
-            potential = self.create_POM()
+            #potential = self.create_POM()
 
             # merge PoM condition
             # check if locally justified complexification
@@ -141,14 +145,14 @@ class Searcher:
                 # TODO: should wait for update to see if this searcher is far behind others and should
                 #       load instead of recurse. not critical if this is a very inferior solution
                 #       the likelihood of timeout in the next evaluation is higher
-                return self.refresh(potential)
+                return self.refresh()
 
             # terminal condition
             if any([x.fitness > self.fitnessObjective
                     for x in self.evaluator.genepool]):
                 # keep searching since alternate conventions still exist
                 print('search complete.')
-                return self.refresh(potential)
+                return self.refresh()
 
         # timeout has occured, request a new PoM to search
         print('search timeout, restarting..')

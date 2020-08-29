@@ -81,11 +81,13 @@ class Searcher:
         """
         # TODO: first condition may be failing
         if self.loadedPOM is not None:
-            potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
-                                                                     key=lambda x: x.fitness), self.loadedPOM)
+            potential = PointOfMutation(deepcopy(self.evaluator.genepool),
+                                        deepcopy(max([x for x in self.evaluator.genepool],
+                                                     key=lambda x: x.fitness)), deepcopy(self.loadedPOM))
         else:
-            potential = PointOfMutation(self.evaluator.genepool, max([x for x in self.evaluator.genepool],
-                                                                     key=lambda x: x.fitness), None)
+            potential = PointOfMutation(deepcopy(self.evaluator.genepool),
+                                        deepcopy(max([x for x in self.evaluator.genepool],
+                                                     key=lambda x: x.fitness)), None)
 
         return potential
 
@@ -136,7 +138,7 @@ class Searcher:
             self.evaluator.nextGeneration(self.fitnessFunction)
 
             # TODO: dont call create_POM every time.
-            #potential = self.create_POM()
+            # potential = self.create_POM()
 
             # merge PoM condition
             # check if locally justified complexification

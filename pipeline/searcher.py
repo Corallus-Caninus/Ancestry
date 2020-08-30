@@ -3,7 +3,10 @@ from multiprocessing.managers import BaseManager
 
 from RiverOfMutation.POM import PointOfMutation
 from organisms.Evaluator import Evaluator
-#from organisms.innovation import GlobalInnovations as localInnovations
+from organisms.Nuclei import Nuclei
+
+
+# from organisms.innovation import GlobalInnovations as localInnovations
 
 
 # NOTE:  this allows implementation of hyperparameter sweep via searchers.
@@ -39,7 +42,7 @@ class Searcher:
         self.fitnessFunction = fitnessFunction
         self.fitnessObjective = fitnessObjective
         # @DEPRECATED
-        #self.localInnovations = localInnovations
+        # self.localInnovations = localInnovations
         self.loadedPOM = None
 
         # setup river pipeline
@@ -63,6 +66,10 @@ class Searcher:
             print('RoM object: ', dir(self.river))
         except:
             raise Exception("Could not connect this pipeline to River..")
+
+        # TODO: should extract hyperparameter configuration
+        #       since effectively restarting evaluator each time. Would
+        #       be more readable since not optimal anyways.
 
         self.evaluator = Evaluator(inputs=2, outputs=1, population=100,
                                    connectionMutationRate=0.5, nodeMutationRate=0.01,
@@ -97,6 +104,8 @@ class Searcher:
         # TODO: just assign here to self
         return potential
 
+    # TODO: load and refresh need to reinstantiate evaluator not
+    #       hack local variables out of scope
     def load(self):
         """
         load a PointOfMutation into this executor for search from a river shared-object
@@ -110,14 +119,16 @@ class Searcher:
         # if river in uninitialized, start searching from init topology.
         if self.loadedPOM is not None:
             self.evaluator.genepool = self.loadedPOM.swap(len(self.evaluator.genepool))
+            self.evaluator.Nuclei = Nuclei()
             # load in innovations from river to hopefully speed up verification \
             # and prevent memory bloat
         else:
             print('received initial PoM..')
             self.evaluator.genepool = deepcopy(self.initGenepool)
+            self.evaluator.Nuclei = Nuclei()
             self.loadedPOM = self.create_POM()
 
-        #self.evaluator.globalInnnovations = self.river.load_map()
+        # self.evaluator.globalInnnovations = self.river.load_map()
 
     def refresh(self):
         """
@@ -130,8 +141,9 @@ class Searcher:
         self.river.update(self.loadedPOM)
 
         self.evaluator.genepool = deepcopy(self.evaluator.genepool)
+        self.evaluator.Nuclei = Nuclei()
         # NOTE: only load map in initializer since using manager lock (hopefully)
-        #self.evaluator.globalInnovations = self.river.load_map()
+        # self.evaluator.globalInnovations = self.river.load_map()
 
         # TODO: ensure this is not the previous PoM reference
         fresh = self.create_POM()

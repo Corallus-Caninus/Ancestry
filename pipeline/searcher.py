@@ -3,7 +3,7 @@ from multiprocessing.managers import BaseManager
 
 from RiverOfMutation.POM import PointOfMutation
 from organisms.Evaluator import Evaluator
-from organisms.innovation import GlobalInnovations as localInnovations
+#from organisms.innovation import GlobalInnovations as localInnovations
 
 
 # NOTE:  this allows implementation of hyperparameter sweep via searchers.
@@ -38,7 +38,8 @@ class Searcher:
         self.address = address
         self.fitnessFunction = fitnessFunction
         self.fitnessObjective = fitnessObjective
-        self.localInnovations = localInnovations
+        # @DEPRECATED
+        #self.localInnovations = localInnovations
         self.loadedPOM = None
 
         # setup river pipeline
@@ -73,6 +74,7 @@ class Searcher:
         # TODO: hold POM objects here for merging since this now
         #       handles all POM initialization and qualifying comparison
         self.initGenepool = deepcopy(self.evaluator.genepool)
+        self.evaluator.globalInnovations = self.river.load_map()
         self.load()
 
     def create_POM(self):
@@ -115,7 +117,7 @@ class Searcher:
             self.evaluator.genepool = deepcopy(self.initGenepool)
             self.loadedPOM = self.create_POM()
 
-        self.evaluator.globalInnnovations = self.river.load_map()
+        #self.evaluator.globalInnnovations = self.river.load_map()
 
     def refresh(self):
         """
@@ -128,7 +130,8 @@ class Searcher:
         self.river.update(self.loadedPOM)
 
         self.evaluator.genepool = deepcopy(self.evaluator.genepool)
-        self.evaluator.globalInnovations = self.river.load_map()
+        # NOTE: only load map in initializer since using manager lock (hopefully)
+        #self.evaluator.globalInnovations = self.river.load_map()
 
         # TODO: ensure this is not the previous PoM reference
         fresh = self.create_POM()

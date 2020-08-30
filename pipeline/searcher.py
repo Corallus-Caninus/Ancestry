@@ -123,6 +123,8 @@ class Searcher:
         fresh = self.create_POM()
         self.river.update(fresh)
         self.loadedPOM = fresh
+        #update genepool to keep in sync with PoM
+        self.evaluator.genepool = fresh.snapshot
         self.evaluator.globalInnovations = self.river.load_map()
         return self.exec()
 

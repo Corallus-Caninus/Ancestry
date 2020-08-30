@@ -126,7 +126,7 @@ class Searcher:
         # update genepool to keep in sync with PoM
         # since this is local we don't need to check searcher configuration with POM.swap
         # TODO: refactor evaluator configuration for self.refresh and with self.load()
-        self.evaluator.genepool = fresh.swap(len(self.genepool))
+        self.evaluator.genepool = fresh.swap(len(self.evaluator.genepool))
         self.evaluator.globalInnovations = self.river.load_map()
         return self.exec()
 

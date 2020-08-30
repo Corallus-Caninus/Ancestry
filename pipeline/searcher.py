@@ -123,8 +123,10 @@ class Searcher:
         fresh = self.create_POM()
         self.river.update(fresh)
         self.loadedPOM = fresh
-        #update genepool to keep in sync with PoM
-        self.evaluator.genepool = fresh.snapshot
+        # update genepool to keep in sync with PoM
+        # since this is local we don't need to check searcher configuration with POM.swap
+        # TODO: refactor evaluator configuration for self.refresh and with self.load()
+        self.evaluator.genepool = fresh.swap(len(self.genepool))
         self.evaluator.globalInnovations = self.river.load_map()
         return self.exec()
 
@@ -159,7 +161,7 @@ class Searcher:
                 print('search complete.')
                 return self.refresh()
 
-        # timeout has occured, request a new PoM to search
+        # timeout has occurred, request a new PoM to search
         print('search timeout, restarting..')
         self.load()
         return self.exec()

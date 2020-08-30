@@ -79,17 +79,20 @@ class Searcher:
         """
         create a POM with the current genepool.
         """
-        snapshot = deepcopy(self.evaluator.genepool)
+        # snapshot = deepcopy(self.evaluator.genepool)
+        snapshot = self.evaluator.genepool
         mascot = max([x for x in snapshot], key=lambda x: x.fitness)
 
         if self.loadedPOM is not None:
             # TODO: ensure this deepcopy doesnt lose parent relationship
             #       since parents are defined here and unique this
             #       should be fine
-            potential = PointOfMutation(snapshot, mascot, deepcopy(self.loadedPOM))
+            # potential = PointOfMutation(snapshot, mascot, deepcopy(self.loadedPOM))
+            potential = PointOfMutation(snapshot, mascot, self.loadedPOM)
         else:
             potential = PointOfMutation(snapshot, mascot, None)
 
+        # TODO: just assign here to self
         return potential
 
     def load(self):
@@ -116,18 +119,20 @@ class Searcher:
 
     def refresh(self):
         """
-        continue searching the current PoM but retrieve updated
-        innovations and update the river
+        update the RoM with the currently loaded PoM and create a
+        new PoM then continue search
         """
         print('refreshing searcher..')
-        fresh = self.create_POM()
-        self.river.update(fresh)
-        self.loadedPOM = fresh
-        # update genepool to keep in sync with PoM
-        # since this is local we don't need to check searcher configuration with POM.swap
-        # TODO: refactor evaluator configuration for self.refresh and with self.load()
-        self.evaluator.genepool = fresh.swap(len(self.evaluator.genepool))
+        # TODO: deepcopy here and reference in create_POM
+        #       so update contains new genepool not initialized
+        self.river.update(self.loadedPOM)
+
+        self.evaluator.genepool = deepcopy(self.evaluator.genepool)
         self.evaluator.globalInnovations = self.river.load_map()
+
+        # TODO: ensure this is not the previous PoM reference
+        fresh = self.create_POM()
+        self.loadedPOM = fresh
         return self.exec()
 
     # TODO: load in merged solution on RoM merge (this all needs to be traced

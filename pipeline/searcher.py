@@ -120,12 +120,18 @@ class Searcher:
         if self.loadedPOM is None:
             print('received initial PoM..')
             self.evaluator = Evaluator(**self.params)
+            self.evaluator.globalInnovations = self.river.load_map()
             # @DEPRECATED
             # self.evaluator.genepool = deepcopy(self.initGenepool)
             self.loadedPOM = self.create_POM()
         else:
             # TODO: this may throw but at least it will be more informative through exclusion
+            # TODO: yup THIS IS IT. add copy method to evaluator
+            #       (this is pythons greatest weakness: trees, as exemplified by std deepcopy)
+            # TODO: can serialize evaluator and copy hyperparameters instead of genepool
+            #       on swapin
             self.evaluator = Evaluator(**self.params)
+            self.evaluator.globalInnovations = self.river.load_map()
             self.evaluator.genepool = self.loadedPOM.swap(len(self.evaluator.genepool))
             # load in innovations from river to hopefully speed up verification \
             # and prevent memory bloat

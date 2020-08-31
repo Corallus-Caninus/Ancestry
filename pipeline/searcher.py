@@ -10,7 +10,7 @@ from organisms.Evaluator import Evaluator
 
 # NOTE:  this allows implementation of hyperparameter sweep via searchers.
 #        Eventually automate this so the environment alters mutation rates.
-#        would also like remove distance parameter for PoM radius.
+#        would also like remove distance parameter for PoM radius (atomize).
 #
 #       need to resolve:
 #       RoM structure since edges are no longer finite sample space.
@@ -70,7 +70,7 @@ class Searcher:
         #       since effectively restarting evaluator each time. Would
         #       be more readable since not optimal anyways.
         self.params = {'inputs': 2, 'outputs': 1, 'population': 100,
-                       'connectionMutationRate': 0.5, 'nodeMutationRate': 0.01,
+                       'connectionMutationRate': 0.05, 'nodeMutationRate': 0.01,
                        'weightMutationRate': 0.6, 'weightPerturbRate': 0.9,
                        'selectionPressure': 3}
         self.evaluator = Evaluator(**self.params)

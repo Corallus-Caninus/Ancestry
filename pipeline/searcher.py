@@ -19,7 +19,7 @@ from organisms.Evaluator import Evaluator
 #           |_generalization more complex.
 # NOTE: can always use lower level shared Queue if this starts failing or needs
 #       simple optimization.
-# TODO: rename to searcher or something Searcher is a little too forced of a metaphore
+# TODO: shared globalInnovations doesnt want to work. Trace back specific error
 class Searcher:
     def __init__(self, timeout, address, fitnessFunction, fitnessObjective):
         """
@@ -66,22 +66,17 @@ class Searcher:
         except:
             raise Exception("Could not connect this pipeline to River..")
 
-        # TODO: should extract hyperparameter configuration
+        # TODO: should extract hyperparameter configuration to callers parameters
         #       since effectively restarting evaluator each time. Would
         #       be more readable since not optimal anyways.
         self.params = {'inputs': 2, 'outputs': 1, 'population': 100,
-                       'connectionMutationRate': 0.05, 'nodeMutationRate': 0.01,
-                       'weightMutationRate': 0.6, 'weightPerturbRate': 0.9,
+                       'connectionMutationRate': 0.005, 'nodeMutationRate': 0.001,
+                       'weightMutationRate': 0.06, 'weightPerturbRate': 0.9,
                        'selectionPressure': 3}
         self.evaluator = Evaluator(**self.params)
-        # @DEPRECATED
-        # self.evaluator = Evaluator(inputs=2, outputs=1, population=100,
-        #                            connectionMutationRate=0.5, nodeMutationRate=0.01,
-        #                            weightMutationRate=0.6, weightPerturbRate=0.9,
-        #                            selectionPressure=3)
-        # self.initGenepool = deepcopy(self.evaluator.genepool)
-        # TODO: refactor this with respect to self.load
-        self.evaluator.globalInnovations = self.river.load_map()
+        # TODO: refactor this with respect to self.load need evaluator method for initializing with globalInnovations
+        # TODO: this is already performed in self.load()
+        # self.evaluator.globalInnovations = self.river.load_map()
         self.load()
 
     def create_POM(self):
@@ -92,51 +87,43 @@ class Searcher:
         snapshot = self.evaluator.genepool
         mascot = max([x for x in snapshot], key=lambda x: x.fitness)
 
-        if self.loadedPOM is not None:
+        if self.loadedPOM is None:
+            potential = PointOfMutation(snapshot, mascot, None)
+        else:
             # TODO: ensure this deepcopy doesnt lose parent relationship
             #       since parents are defined here and unique this
-            #       should be fine
+            #       should be fine. with deepcopy of RoM update/load
+            # TODO: this reference is broken. on load PoM is deepcopied
             # potential = PointOfMutation(snapshot, mascot, deepcopy(self.loadedPOM))
             potential = PointOfMutation(snapshot, mascot, self.loadedPOM)
-        else:
-            potential = PointOfMutation(snapshot, mascot, None)
 
         # TODO: just assign here to self
         return potential
 
-    # TODO: load and refresh need to reinstantiate evaluator not
-    #       hack local variables out of scope
+    # TODO: keep localInnovations in Evaluator and pass up to RoM which can
+    #       merge into globalInnovations. implement updating evaluators to future
+    #       globalInnovations later once features are working
     def load(self):
         """
         load a PointOfMutation into this executor for search from a river shared-object
         pipeline.
         """
-        # NOTE: shouldn't have to reload Evaluator each call just swap out population
-        #       and update globalInnovation
-
         self.loadedPOM = deepcopy(self.river.load())
-        print('received {} PoM..'.format(self.loadedPOM))
-        # if river in uninitialized, start searching from init topology.
         if self.loadedPOM is None:
             print('received initial PoM..')
             self.evaluator = Evaluator(**self.params)
-            self.evaluator.globalInnovations = self.river.load_map()
+            # self.evaluator.globalInnovations = self.river.load_map()
             # @DEPRECATED
             # self.evaluator.genepool = deepcopy(self.initGenepool)
             self.loadedPOM = self.create_POM()
         else:
-            # TODO: this may throw but at least it will be more informative through exclusion
-            # TODO: yup THIS IS IT. add copy method to evaluator
-            #       (this is pythons greatest weakness: trees, as exemplified by std deepcopy)
+            print('received {} PoM..'.format(self.loadedPOM))
             # TODO: can serialize evaluator and copy hyperparameters instead of genepool
             #       on swapin
             self.evaluator = Evaluator(**self.params)
-            self.evaluator.globalInnovations = self.river.load_map()
             self.evaluator.genepool = self.loadedPOM.swap(len(self.evaluator.genepool))
-            # load in innovations from river to hopefully speed up verification \
-            # and prevent memory bloat
-
-        # self.evaluator.globalInnnovations = self.river.load_map()
+            # deepcopy innovations to make atomic wrt RoM
+            self.evaluator.globalInnovations = deepcopy(self.river.load_map())
 
     def refresh(self):
         """
@@ -144,17 +131,9 @@ class Searcher:
         new PoM.
         """
         print('refreshing searcher..')
-        # TODO: deepcopy here and reference in create_POM
-        #       so update contains new genepool not initialized
-        #       want to be able to support multiple searchers of the same
-        #       POM so need to resolve this. if deepcopying from RoM
-        #       here and in load extrect to RoM
+        # submit a deepcopy PoM for comparison in RoM. this is fine since mascot
+        # is used for comparison so PoM optimization is the same as merge
         self.river.update(deepcopy(self.loadedPOM))
-        # @DEPRECATED
-        # self.evaluator = Evaluator(self.params)
-        # self.evaluator.genepool = deepcopy(self.evaluator.genepool)
-        # NOTE: only loading map in initializer since using manager lock (hopefully)
-        # self.evaluator.globalInnovations = self.river.load_map()
 
         # TODO: ensure this is not the previous PoM reference
         #       probably dont need to create a new POM since

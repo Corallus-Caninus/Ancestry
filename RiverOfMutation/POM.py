@@ -26,6 +26,10 @@ class PointOfMutation:
 
         self.children = []
 
+    def __str__(self):
+        '''returns fitness and a checksum position (UUID) to fully describe this PoM'''
+        return '<PoM: fit({}) pos({})>'.format(self.mascot.fitness, sum(self.mascot.geneticPosition()))
+
     def __add__(self, other):
         self.merge(other)
 
@@ -49,6 +53,8 @@ class PointOfMutation:
             self.parent = self.parent.parent
 
         self.children.extend(otherPoM.children)
+        # TODO: have to remove children who are also in the blob at a later point
+        #       otherwise falsly preserved through reference iteration
         for child in self.children:
             child.parent = self
 

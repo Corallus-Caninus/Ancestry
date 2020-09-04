@@ -8,9 +8,8 @@ from RiverOfMutation.ROM import RiverOfMutations
 
 if __name__ == '__main__':
     # TODO: read config for address, authkey and hyperparameters
-    # TODO: double splat a dictionary for keyword
+    # TODO: double splat a dictionary for keyword etc.
     # TODO: read in from object storage
-    # TODO: create a class this should be a class for SaaS configuration
 
     distanceParams = {'radius': 10, 'excess_metric': 1,
                       'disjoint_metric': 0.5, 'connection_metric': 0.5}
